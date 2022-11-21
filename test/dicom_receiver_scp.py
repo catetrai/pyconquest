@@ -1,5 +1,5 @@
 from pyconquest import pyconquest
 import time
 
-c=pyconquest()
+c = pyconquest()
 c.start_dicom_listener()
