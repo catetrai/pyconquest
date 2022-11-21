@@ -24,11 +24,11 @@ def create_img_thumbnail(dataset: Dataset) -> str:
         raise ValueError("Image must contain PixelData element to generate "
                          "thumbnail")
 
-    fig, ax = plt.subplots(1, 1, squeeze=False, figsize=(2, 2))
-    fig.subplots_adjust(wspace=0.05, hspace=0.05)
-    ax[0].imshow(dataset.pixel_array, cmap=plt.cm.bone)
-    ax[0].axis("off")
-    ax[0].grid(visible=None)
+    fig = plt.figure(figsize=(2, 2))
+    ax = fig.add_subplot()
+    ax.imshow(dataset.pixel_array, cmap=plt.cm.bone)
+    ax.axis("off")
+    ax.grid(visible=None)
 
     # Save image to JPEG byte buffer and encode into to Base64 string
     io_bytes = io.BytesIO()
