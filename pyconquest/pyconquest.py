@@ -62,6 +62,7 @@ class pyconquest:
         "PixelSpacing",
         "AnatomicRegionSequence",
         "ProcedureCodeSequence",
+        "position_in_cfind_results",
         "jpeg_thumbnail",
     ]
     __prev_seriesuid = ""
