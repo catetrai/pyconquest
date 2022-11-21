@@ -19,6 +19,8 @@ import csv
 import sys
 from logging.handlers import RotatingFileHandler
 
+from pyconquest.img_processing import create_img_thumbnail
+
 log = logging.getLogger(__name__)
 LOGFORMAT = "%(levelname)s %(asctime)s [%(filename)-15s:%(lineno)-4s][%(funcName)-30s]\t%(message)s"
 log.setLevel(logging.ERROR)
@@ -27,9 +29,7 @@ ch = logging.StreamHandler(sys.stderr)
 ch.setFormatter(logging.Formatter(LOGFORMAT))
 log.addHandler(ch)
 
-fh = RotatingFileHandler(
-    "pyconquest_error.log", maxBytes=(100000), backupCount=1
-)
+fh = RotatingFileHandler("pyconquest_error.log", maxBytes=(100000), backupCount=1)
 fh.setFormatter(logging.Formatter(LOGFORMAT))
 fh.setLevel(logging.ERROR)
 log.addHandler(fh)
@@ -166,9 +166,7 @@ class pyconquest:
             cols = cursor.description
             query_result = [
                 dict(line)
-                for line in [
-                    zip([column[0] for column in cols], row) for row in data
-                ]
+                for line in [zip([column[0] for column in cols], row) for row in data]
             ]
             log.debug("Query : " + query)
             log.debug("Result: " + str(query_result))
@@ -207,11 +205,7 @@ class pyconquest:
             self.conn_pacs.commit()
         except Exception as e:
             if str(e).startswith("no such table") == True:
-                log.info(
-                    "Now creating table : {} to insert dict in".format(
-                        tablename
-                    )
-                )
+                log.info("Now creating table : {} to insert dict in".format(tablename))
                 buildquery = self.create_buildquery(
                     tablename,
                     datadict,
@@ -275,12 +269,10 @@ class pyconquest:
         :returns: string formatted as an insert query"""
 
         myDict = self.__convert_listvalues_to_conquest_style(myDict)
-        columns_string = ("(" + ",".join(myDict.keys()) + ")").replace(
-            "-", "_"
+        columns_string = ("(" + ",".join(myDict.keys()) + ")").replace("-", "_")
+        values_string = ('("' + '","'.join(map(str, myDict.values())) + '")').replace(
+            "'", " "
         )
-        values_string = (
-            '("' + '","'.join(map(str, myDict.values())) + '")'
-        ).replace("'", " ")
         sql = """INSERT INTO %s %s VALUES %s""" % (
             table,
             columns_string,
@@ -329,12 +321,7 @@ class pyconquest:
                 str(val).startswith("[") is True
                 and key not in self.__extra_imagetable_columns
             ):
-                val = (
-                    str(val)
-                    .replace("[", "")
-                    .replace("]", "")
-                    .replace(",", "\\")
-                )
+                val = str(val).replace("[", "").replace("]", "").replace(",", "\\")
                 Dict[key] = val
         return Dict
 
@@ -352,11 +339,7 @@ class pyconquest:
                 self.__db_design[tablename].append(col)
                 log.info("Added column {} to table {}".format(col, tablename))
             except Exception:
-                log.error(
-                    "failed to add column {} to table {}".format(
-                        col, tablename
-                    )
-                )
+                log.error("failed to add column {} to table {}".format(col, tablename))
 
     def __read_conquest_sql_inifile(self, filename):
         """reads in the conquest style .sql file where the db is defined, follows original file format"""
@@ -371,11 +354,7 @@ class pyconquest:
 
         for line in lines:
             # comment lines
-            if (
-                line.startswith("#")
-                or line.startswith("/*")
-                or line.startswith("*/")
-            ):
+            if line.startswith("#") or line.startswith("/*") or line.startswith("*/"):
                 continue
             # definition of tablename
             if line.startswith("*"):
@@ -386,9 +365,7 @@ class pyconquest:
 
             # end of table def
             if line.startswith("}"):
-                log.info(
-                    "reading table " + tablename + " from inifile:" + filename
-                )
+                log.info("reading table " + tablename + " from inifile:" + filename)
                 self.__db_design[tablename] = list_of_rows
                 continue
 
@@ -479,12 +456,8 @@ class pyconquest:
                     if not self.__check_if_table_contains(
                         "DICOMpatients", "Patientid", patientid
                     ):
-                        patientdict = self.__create_tabledict(
-                            "DICOMpatients", ds
-                        )
-                        query = self.create_insertquery(
-                            "DICOMpatients", patientdict
-                        )
+                        patientdict = self.__create_tabledict("DICOMpatients", ds)
+                        query = self.create_insertquery("DICOMpatients", patientdict)
                         self.execute_db_query(query)
 
     def create_standard_dicom_tables(self):
@@ -534,8 +507,7 @@ class pyconquest:
             mrn = root[len(self.data_directory) + 1 :]
             if (mrn in already_present) and (compute_only_missing is True):
                 log.info(
-                    "Skipping Directory, PatientID already in database: "
-                    + str(mrn)
+                    "Skipping Directory, PatientID already in database: " + str(mrn)
                 )
                 continue
 
@@ -567,9 +539,7 @@ class pyconquest:
             target_filename = "{}/{}/{}".format(
                 self.data_directory, patientid, os.path.basename(filename)
             )
-            target_filename_db = "{}/{}".format(
-                patientid, os.path.basename(filename)
-            )
+            target_filename_db = "{}/{}".format(patientid, os.path.basename(filename))
             path = "{}/{}".format(self.data_directory, patientid)
             if not os.path.exists(path):
                 os.makedirs(path)
@@ -646,9 +616,9 @@ class pyconquest:
                 ).hexdigest()
 
             try:
-                referenced_seriesuid = ds[0x3006, 0x0010][0][0x3006, 0x0012][
-                    0
-                ][0x3006, 0x0014][0][0x0020, 0x000E].value
+                referenced_seriesuid = ds[0x3006, 0x0010][0][0x3006, 0x0012][0][
+                    0x3006, 0x0014
+                ][0][0x0020, 0x000E].value
                 returndict["ReferencedSeriesUID"] = referenced_seriesuid
             except:
                 log.error("Error when extracting referenced_seriesuid")
@@ -696,9 +666,31 @@ class pyconquest:
                 )
 
             if self.__compute_hash:
-                returndict["hash"] = hashlib.md5(
-                    pickle.dumps(ds.PixelData)
-                ).hexdigest()
+                returndict["hash"] = hashlib.md5(pickle.dumps(ds.PixelData)).hexdigest()
+
+        elif dicomtype == "MR" and "SOPInstanceUID" in ds:
+            # We assume X and Y pixel spacing are identical, so only take X
+            if "PixelSpacing" in ds:
+                returndict["PixelSpacing"] = ds.PixelSpacing[0]
+
+            if "AnatomicRegionSequence" in ds and len(ds.AnatomicRegionSequence) > 0:
+                returndict["AnatomicRegionSequence"] = ds.AnatomicRegionSequence[
+                    0
+                ].CodeMeaning
+
+            if "ProcedureCodeSequence" in ds and len(ds.ProcedureCodeSequence) > 0:
+                returndict["ProcedureCodeSequence"] = ds.ProcedureCodeSequence[
+                    0
+                ].CodeValue
+
+            # Create pixel image thumbnail stored as base64-encoded JPEG
+            log.info("Generating image thumbnail ...")
+            try:
+                create_img_thumbnail(ds)
+            except Exception as ex:
+                log.error(f"Could not generate image thumbnail for "
+                          f"{ds.SOPInstanceUID}: "
+                          f"{ex}")
 
         return returndict
 
@@ -706,9 +698,7 @@ class pyconquest:
         if element.keyword == "ReferencedSOPInstanceUID":
             ds.ReferencedSOPInstanceUID = ""
 
-    def delete_series(
-        self, seriesuid="", query=None, delete_files=False, mrn=None
-    ):
+    def delete_series(self, seriesuid="", query=None, delete_files=False, mrn=None):
         """Deletes a single or multiple series from the disk and from the database
 
         :param: seriesuid : a single string (one seriesuid) or a list of seriesuids of series that should be deleted
@@ -719,30 +709,20 @@ class pyconquest:
         """
         if mrn is not None:
             if delete_files == True:
-                log.error(
-                    "Cannot delete on mrn and physically delete the files"
-                )
+                log.error("Cannot delete on mrn and physically delete the files")
                 return -1
             else:
                 self.execute_db_query(
-                    query='delete from dicomimages where imagepat="{}"'.format(
-                        mrn
-                    )
+                    query='delete from dicomimages where imagepat="{}"'.format(mrn)
                 )
                 self.execute_db_query(
-                    query='delete from dicomseries where seriespat="{}"'.format(
-                        mrn
-                    )
+                    query='delete from dicomseries where seriespat="{}"'.format(mrn)
                 )
                 self.execute_db_query(
-                    query='delete from dicomstudies where PatientID="{}"'.format(
-                        mrn
-                    )
+                    query='delete from dicomstudies where PatientID="{}"'.format(mrn)
                 )
                 self.execute_db_query(
-                    query='delete from dicompatients where PatientID="{}"'.format(
-                        mrn
-                    )
+                    query='delete from dicompatients where PatientID="{}"'.format(mrn)
                 )
 
                 log.info(
@@ -759,9 +739,7 @@ class pyconquest:
             self.delete_series(seriesuid=serieslist, delete_files=delete_files)
             return ()
 
-        if isinstance(
-            seriesuid, list
-        ):  # recursive call in case of list as input
+        if isinstance(seriesuid, list):  # recursive call in case of list as input
             for suid in seriesuid:
                 self.delete_series(seriesuid=suid, delete_files=delete_files)
             return ()
@@ -782,9 +760,7 @@ class pyconquest:
             for row in return_list:
                 studyuid = row["StudyInsta"]
                 patientid = row["ImagePat"]
-                filename = "{}/{}".format(
-                    self.data_directory, row["ObjectFile"]
-                )
+                filename = "{}/{}".format(self.data_directory, row["ObjectFile"])
                 if os.path.exists(filename):
                     if delete_files:
                         os.remove(filename)
@@ -805,23 +781,19 @@ class pyconquest:
                 self.execute_db_query(query)
 
             # delete dicomseries table entry
-            query = 'delete from dicomseries where seriesinst="{}"'.format(
-                seriesuid
-            )
+            query = 'delete from dicomseries where seriesinst="{}"'.format(seriesuid)
             self.execute_db_query(query)
 
             # now delete the study entry in db if this is the last ...
-            query_for_remaining_series = 'select count(*) as nr from dicomseries where studyinsta="{}"'.format(
-                studyuid
+            query_for_remaining_series = (
+                'select count(*) as nr from dicomseries where studyinsta="{}"'.format(
+                    studyuid
+                )
             )
-            remaining_series = self.execute_db_query(
-                query_for_remaining_series
-            )
+            remaining_series = self.execute_db_query(query_for_remaining_series)
             if remaining_series[0]["nr"] == 0:
-                query = (
-                    'delete from dicomstudies where StudyInsta="{}"'.format(
-                        studyuid
-                    )
+                query = 'delete from dicomstudies where StudyInsta="{}"'.format(
+                    studyuid
                 )
                 self.execute_db_query(query)
                 log.info(
@@ -830,17 +802,15 @@ class pyconquest:
                     )
                 )
 
-            query_for_remaining_studies = 'select count(*) as nr from dicomstudies where PatientID="{}"'.format(
-                patientid
+            query_for_remaining_studies = (
+                'select count(*) as nr from dicomstudies where PatientID="{}"'.format(
+                    patientid
+                )
             )
-            remaining_studies = self.execute_db_query(
-                query_for_remaining_studies
-            )
+            remaining_studies = self.execute_db_query(query_for_remaining_studies)
             if remaining_studies[0]["nr"] == 0:
-                query = (
-                    'delete from dicompatients where PatientID="{}"'.format(
-                        patientid
-                    )
+                query = 'delete from dicompatients where PatientID="{}"'.format(
+                    patientid
                 )
                 self.execute_db_query(query)
                 log.info(
@@ -870,9 +840,7 @@ class pyconquest:
         """
 
         if not seriesuid is None:
-            if isinstance(
-                seriesuid, list
-            ):  # recursive call in case of list as input
+            if isinstance(seriesuid, list):  # recursive call in case of list as input
                 for suid in seriesuid:
                     self.copy_dicom_files_to_dest(
                         seriesuid=suid,
@@ -898,9 +866,7 @@ class pyconquest:
                 )
             return
         else:
-            log.error(
-                "As yet unimplemented option in copy_dicom_files_to_dest"
-            )
+            log.error("As yet unimplemented option in copy_dicom_files_to_dest")
             return -1
 
         if return_list and CreateDir:
@@ -910,30 +876,17 @@ class pyconquest:
 
         if not UseSubDirectories:
             for row in return_list:
-                filename = "{}/{}".format(
-                    self.data_directory, row["ObjectFile"]
-                )
+                filename = "{}/{}".format(self.data_directory, row["ObjectFile"])
                 log.info("copying " + filename + " to dest : " + destination)
                 shutil.copy(filename, destination)
         else:
             for row in return_list:
-                filename = "{}/{}".format(
-                    self.data_directory, row["ObjectFile"]
-                )
-                destination_patientdir = "{}/{}".format(
-                    destination, row["ImagePat"]
-                )
+                filename = "{}/{}".format(self.data_directory, row["ObjectFile"])
+                destination_patientdir = "{}/{}".format(destination, row["ImagePat"])
                 if not os.path.exists(destination_patientdir):
                     os.makedirs(destination_patientdir)
-                    log.info(
-                        "Directory " + destination_patientdir + " Created "
-                    )
-                log.info(
-                    "copying "
-                    + filename
-                    + " to dest : "
-                    + destination_patientdir
-                )
+                    log.info("Directory " + destination_patientdir + " Created ")
+                log.info("copying " + filename + " to dest : " + destination_patientdir)
                 shutil.copy(filename, destination_patientdir)
         return 1
 
@@ -987,9 +940,7 @@ class pyconquest:
         # query for filenames and fill list of fienames
         result = self.execute_db_query(query)
         for line in result:
-            filename_list.append(
-                self.data_directory + "\\" + line["ObjectFile"]
-            )
+            filename_list.append(self.data_directory + "\\" + line["ObjectFile"])
 
         self.send_dicom_file(
             addres,
@@ -1032,11 +983,7 @@ class pyconquest:
                 # Check the status of the storage request
                 if status:
                     # If the storage request succeeded this will be 0x0000
-                    log.info(
-                        "C-STORE request status: 0x{0:04x}".format(
-                            status.Status
-                        )
-                    )
+                    log.info("C-STORE request status: 0x{0:04x}".format(status.Status))
                 else:
                     log.error(
                         "Connection timed out, was aborted or received invalid response"
@@ -1155,9 +1102,7 @@ class pyconquest:
         result = self.execute_db_query(query)
 
         if print_summary:
-            print(
-                "  PatientID    nrCT nrMR  nrPT nrRTSTRUCT nrRTDOSE nrRTPLAN"
-            )
+            print("  PatientID    nrCT nrMR  nrPT nrRTSTRUCT nrRTDOSE nrRTPLAN")
             rowcount = 0
             for r in result:
                 rowcount = rowcount + 1
@@ -1264,9 +1209,7 @@ class pyconquest:
         if self.exclude_filter[0] != "":
             for pattern in self.exclude_filter:
                 p = re.compile(pattern, self.roi_filter_flags)
-                roinames = [
-                    roiname for roiname in roinames if not p.match(roiname)
-                ]
+                roinames = [roiname for roiname in roinames if not p.match(roiname)]
 
         for pattern in self.include_filter:
             p = re.compile(pattern, self.roi_filter_flags)
