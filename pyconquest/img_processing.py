@@ -1,7 +1,7 @@
 import base64
 import io
 
-import matplotlib as plt
+import matplotlib.pyplot as plt
 from pydicom import Dataset
 
 
