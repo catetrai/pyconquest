@@ -88,7 +88,7 @@
 	{ 0x0028, 0x0002, "SamplesPerPixel", 5, SQL_C_CHAR, DT_UINT16 },
 	{ 0x0028, 0x0004, "PhotoMetricInterpretation", 16, SQL_C_CHAR, DT_STR },
 	{ 0x0028, 0x0010, "Rows", 5, SQL_C_CHAR, DT_UINT16 },
-	{ 0x0028, 0x0011, "Colums", 5, SQL_C_CHAR, DT_UINT16 },
+	{ 0x0028, 0x0011, "Columns", 5, SQL_C_CHAR, DT_UINT16 },
 	{ 0x0028, 0x0101, "BitsStored", 5, SQL_C_CHAR, DT_UINT16 },
 	{ 0x0018, 0x0080, "RepetitionTime", 16, SQL_C_CHAR, DT_STR },
 	{ 0x0018, 0x0081, "EchoTime", 16, SQL_C_CHAR, DT_STR },
