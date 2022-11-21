@@ -82,7 +82,6 @@
 	{ 0x0020, 0x0012, "AcqNumber", 12, SQL_C_CHAR, DT_STR },
 	{ 0x0018, 0x0091, "EchoTrainLength", 5, SQL_C_CHAR, DT_UINT16 },
 	{ 0x0018, 0x0020, "ScanningSequence", 64, SQL_C_CHAR, DT_STR },
-	{ 0x0028, 0x0030, "PixelSpacing", 16, SQL_C_CHAR, DT_STR },
 	{ 0x0018, 0x0050, "SliceThickness", 16, SQL_C_CHAR, DT_STR },
 	{ 0x0020, 0x1041, "SliceLocation", 16, SQL_C_CHAR, DT_STR },
 	{ 0x0028, 0x0002, "SamplesPerPixel", 5, SQL_C_CHAR, DT_UINT16 },

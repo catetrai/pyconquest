@@ -59,6 +59,10 @@ class pyconquest:
         "ReferencedSOPUID",
         "DatabaseTimeStamp",
         "hash",
+        "PixelSpacing",
+        "AnatomicRegionSequence",
+        "ProcedureCodeSequence",
+        "jpeg_thumbnail",
     ]
     __prev_seriesuid = ""
     __prev_studyuid = ""
@@ -686,7 +690,7 @@ class pyconquest:
             # Create pixel image thumbnail stored as base64-encoded JPEG
             log.info("Generating image thumbnail ...")
             try:
-                create_img_thumbnail(ds)
+                returndict["jpeg_thumbnail"] = create_img_thumbnail(ds)
             except Exception as ex:
                 log.error(f"Could not generate image thumbnail for "
                           f"{ds.SOPInstanceUID}: "
