@@ -465,6 +465,52 @@ class pyconquest:
                         query = self.create_insertquery("DICOMpatients", patientdict)
                         self.execute_db_query(query)
 
+    def update_table(self, ds, skip_if_exists=True):
+        """
+        Insert or update record in a database table.
+        The table is selected based on the Q/R Level returned in the
+        ``QueryRetrieveLevel`` DICOM attribute.
+
+        Parameters
+        ----------
+        ds: Dataset
+            pydicom Dataset with attributes to be inserted
+        skip_if_exists: bool
+            Do not update if the record already exists
+        """
+        if "QueryRetrieveLevel" not in ds:
+            raise ValueError("Cannot infer Q/R level (Patient / Study / "
+                             "Series / Instance) from dataset")
+
+        qr_level = ds.QueryRetrieveLevel
+        level = qr_level[0].upper() + qr_level[1:].lower()
+        table = self.__name_to_tablename[qr_level]
+        uid_attr_by_level = {
+            "Series": "SeriesInstanceUID",
+            "Image": "SOPInstanceUID",
+            "Patient": "PatientID",
+            "Study": "StudyInstanceUID",
+        }
+
+        level_uid_attr = uid_attr_by_level[level]
+        uid_value = ds[level_uid_attr].value
+
+        if level == "Series" and not (uid_value == self.__prev_seriesuid):
+            self.__prev_seriesuid = uid_value
+
+        if level == "Study" and not (uid_value == self.__prev_studyuid):
+            self.__prev_studyuid = uid_value
+
+        if level == "Patient" and not (uid_value == self.__prev_patientid):
+            self.__prev_patientid = uid_value
+
+        if not self.__check_if_table_contains(
+                table, uid_value[:10], uid_value
+        ) or not skip_if_exists:
+            col_dict = self.__create_tabledict(table, ds)
+            query = self.create_insertquery(table, col_dict)
+            self.execute_db_query(query)
+
     def create_standard_dicom_tables(self):
         """Destroys (if necessary) and recreates empty tables according to the database definition of this instance"""
         for tablename in self.__db_design:
