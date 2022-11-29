@@ -465,7 +465,7 @@ class pyconquest:
                         query = self.create_insertquery("DICOMpatients", patientdict)
                         self.execute_db_query(query)
 
-    def update_table(self, ds, skip_if_exists=True):
+    def update_table(self, ds, skip_if_exists=True, extra_cols=None):
         """
         Insert or update record in a database table.
         The table is selected based on the Q/R Level returned in the
@@ -477,6 +477,9 @@ class pyconquest:
             pydicom Dataset with attributes to be inserted
         skip_if_exists: bool
             Do not update if the record already exists
+        extra_cols : dict
+            Dict with column-value mappings to be included in update
+            in addition to dataset attributes
         """
         if "QueryRetrieveLevel" not in ds:
             raise ValueError("Cannot infer Q/R level (Patient / Study / "
@@ -508,6 +511,8 @@ class pyconquest:
                 table, level_uid_attr[:10], uid_value
         ) or not skip_if_exists:
             col_dict = self.__create_tabledict(table, ds)
+            if extra_cols is not None:
+                col_dict.update(extra_cols)
             query = self.create_insertquery(table, col_dict)
             self.execute_db_query(query)
 
