@@ -301,6 +301,13 @@ class pyconquest:
         :param: default_format : default type of column : DEFAULT : character varying(128)
         :returns: string formatted as an table build query"""
         # columns_string = (' character varying(128),'.join(mydict.keys()) + ' character varying(128)').replace("-", "_")
+        primary_key_for_table = {
+            "DICOMpatients": "PatientID",
+            "DICOMstudies": "StudyInsta",
+            "DICOMseries": "SeriesInst",
+            "DICOMimages": "SOPInstanc",
+        }
+
         columns_string = ""
         for b in mydict:
             if b in exceptions:
@@ -308,7 +315,7 @@ class pyconquest:
             else:
                 fm = default_format
 
-            if b in ("PatientID", "StudyInsta", "SeriesInst", "SOPInstanc"):
+            if b == primary_key_for_table[table]:
                 col_str = "{} {} PRIMARY KEY,".format(b, fm)
             else:
                 col_str = "{} {},".format(b, fm)
