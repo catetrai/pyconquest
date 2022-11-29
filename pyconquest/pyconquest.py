@@ -307,7 +307,12 @@ class pyconquest:
                 fm = exceptions[b]
             else:
                 fm = default_format
-            columns_string = columns_string + "{} {},".format(b, fm)
+
+            if b in ("PatientID", "StudyInsta", "SeriesInst", "SOPInstanc"):
+                col_str = "{} {} PRIMARY KEY,".format(b, fm)
+            else:
+                col_str = "{} {},".format(b, fm)
+            columns_string = columns_string + col_str
 
         sql = """CREATE TABLE {} ({})""".format(
             table, columns_string[:-1].replace("-", "_")
@@ -505,14 +510,11 @@ class pyconquest:
         if level == "Patient" and not (uid_value == self.__prev_patientid):
             self.__prev_patientid = uid_value
 
-        if not self.__check_if_table_contains(
-                table, level_uid_attr[:10], uid_value
-        ):
-            col_dict = self.__create_tabledict(table, ds)
-            if extra_cols is not None:
-                col_dict.update(extra_cols)
-            query = self.create_insertquery(table, col_dict)
-            self.execute_db_query(query)
+        col_dict = self.__create_tabledict(table, ds)
+        if extra_cols is not None:
+            col_dict.update(extra_cols)
+        query = self.create_insertquery(table, col_dict)
+        self.execute_db_query(query)
 
     def create_standard_dicom_tables(self):
         """Destroys (if necessary) and recreates empty tables according to the database definition of this instance"""
