@@ -505,7 +505,7 @@ class pyconquest:
             self.__prev_patientid = uid_value
 
         if not self.__check_if_table_contains(
-                table, uid_value[:10], uid_value
+                table, level_uid_attr[:10], uid_value
         ) or not skip_if_exists:
             col_dict = self.__create_tabledict(table, ds)
             query = self.create_insertquery(table, col_dict)
