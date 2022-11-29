@@ -484,7 +484,7 @@ class pyconquest:
 
         qr_level = ds.QueryRetrieveLevel
         level = qr_level[0].upper() + qr_level[1:].lower()
-        table = self.__name_to_tablename[qr_level]
+        table = self.__name_to_tablename[level]
         uid_attr_by_level = {
             "Series": "SeriesInstanceUID",
             "Image": "SOPInstanceUID",
