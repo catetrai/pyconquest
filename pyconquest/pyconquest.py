@@ -541,7 +541,7 @@ class pyconquest:
             self.execute_db_query(query)
 
         self.__create_db_views()
-        self.__create_db_index_tables()
+        #self.__create_db_index_tables()
 
     def rebuild_database_from_dicom(
         self, mrn=None, compute_only_missing=True, check_existing=True
